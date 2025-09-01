@@ -1,31 +1,42 @@
 import express from "express";
 import multer from "multer";
 import Project from "../models/Project.js";
-import path from "path";
+import { v2 as cloudinary } from "cloudinary";
+import { CloudinaryStorage } from "multer-storage-cloudinary";
 
 const router = express.Router();
 
-// Storage setup for Multer
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/");
+// ✅ Cloudinary config
+cloudinary.config({
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.CLOUD_API_KEY,
+  api_secret: process.env.CLOUD_API_SECRET,
+});
+
+// ✅ Multer-Cloudinary Storage
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: "projects",
+    allowed_formats: ["jpg", "png", "jpeg", "webp"],
   },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname)); 
-  }
 });
 
 const upload = multer({ storage });
 
-// POST: Upload new project
+// 📌 POST: Upload Project
 router.post("/", upload.single("image"), async (req, res) => {
   try {
-    const { price, content } = req.body;
+    const { title, price, warranty, content } = req.body;
+
     const newProject = new Project({
-      imageUrl: `/uploads/${req.file.filename}`,
+      title,
       price,
+      warranty,
       content,
+      imageUrl: req.file.path, // 🔥 Cloudinary URL
     });
+
     await newProject.save();
     res.json(newProject);
   } catch (error) {
@@ -33,7 +44,7 @@ router.post("/", upload.single("image"), async (req, res) => {
   }
 });
 
-// GET: Fetch all projects
+// 📌 GET: Fetch All Projects
 router.get("/", async (req, res) => {
   try {
     const projects = await Project.find();
@@ -43,7 +54,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-// DELETE: Remove project
+// 📌 DELETE: Delete Project
 router.delete("/:id", async (req, res) => {
   try {
     await Project.findByIdAndDelete(req.params.id);
