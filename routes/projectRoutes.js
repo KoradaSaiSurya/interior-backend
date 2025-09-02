@@ -99,20 +99,24 @@ const upload = multer({
 });
 
 // POST: Upload Project
+// POST: Upload Project
 router.post("/", upload.single("image"), async (req, res) => {
   try {
     const { title, price, warranty, content } = req.body;
 
-    if (!req.file) {
-      return res.status(400).json({ message: "Image is required" });
-    }
+   if (!req.file) {
+  console.log("❌ File not received in backend");
+  return res.status(400).json({ message: "Image is required" });
+}
+console.log("✅ File received:", req.file);
+
 
     const newProject = new Project({
       title,
       price,
       warranty,
       content,
-      imageUrl: req.file.path, // ✅ Cloudinary URL
+      imageUrl: req.file.secure_url || req.file.path, // ✅ FIX
     });
 
     await newProject.save();
@@ -121,6 +125,7 @@ router.post("/", upload.single("image"), async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+
 
 // GET: Fetch All Projects
 router.get("/", async (req, res) => {
