@@ -95,7 +95,7 @@ const storage = new CloudinaryStorage({
 
 const upload = multer({
   storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // ✅ max 5MB
+  limits: { fileSize: 20 * 1024 * 1024 }, 
 });
 
 // POST: Upload Project
