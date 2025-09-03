@@ -6,6 +6,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import dotenv from "dotenv";
 import projectRoutes from "./routes/projectRoutes.js";
+import contactRoutes from "./routes/contactRoutes.js";
 
 // ✅ Load environment variables
 dotenv.config();
@@ -28,6 +29,8 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Routes
 app.use("/api/projects", projectRoutes);
+app.use("/api/projects", projectRoutes);
+app.use("/api/contact", contactRoutes);
 
 // ✅ Connect to MongoDB Atlas
 mongoose.connect(process.env.MONGO_URI, {
